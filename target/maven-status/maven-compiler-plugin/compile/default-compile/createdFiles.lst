@@ -1,0 +1,9 @@
+com\example\app\security\LoginBean.class
+com\example\app\web\ChatBean.class
+com\example\app\security\AuthFilter.class
+com\example\app\entity\ChatMessage.class
+com\example\app\entity\Student.class
+com\example\app\service\UserService.class
+com\example\app\web\TchatEndpoint.class
+com\example\app\service\MessageService.class
+com\example\app\entity\User.class
