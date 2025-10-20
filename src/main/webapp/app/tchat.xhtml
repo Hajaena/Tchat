@@ -52,6 +52,7 @@
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
             color: #212529;
             line-height: 1.5;
+            border-left: 4px solid #6c757d;
         }
 
         #messages::-webkit-scrollbar {
@@ -139,35 +140,62 @@
         }
     </style>
     <script>
-        let ws;
+        //<![CDATA[
+        function getUserColor(username) {
+            var colors = {
+                'Hajaina': '#6c757d',
+                'Cory': '#28a745',
+                'default': '#007bff'
+            };
+
+            if (colors[username]) {
+                return colors[username];
+            }
+
+            var hash = 0;
+            for (var i = 0; i < username.length; i++) {
+                hash = username.charCodeAt(i) + ((hash << 5) - hash);
+            }
+
+            var hue = hash % 360;
+            return 'hsl(' + hue + ', 50%, 45%)';
+        }
+
+        var ws;
         function connect() {
-            const loc = window.location;
-            const proto = loc.protocol === 'https:' ? 'wss:' : 'ws:';
-            const base = '#{request.contextPath}'; // ex: /monapp
-            const url = proto + '//' + loc.host + base + '/ws/tchat';
+            var loc = window.location;
+            var proto = loc.protocol === 'https:' ? 'wss:' : 'ws:';
+            var base = '#{request.contextPath}';
+            var url = proto + '//' + loc.host + base + '/ws/tchat';
             ws = new WebSocket(url);
 
-            ws.onopen = () => console.log('WS open:', url);
-            ws.onerror = e => console.error('WS error', e);
-            ws.onclose = () => console.log('WS closed');
-            ws.onmessage = e => {
-                const msg = JSON.parse(e.data);
-                const box = document.getElementById('messages');
-                const div = document.createElement('div');
+            ws.onopen = function () { console.log('WS open:', url); };
+            ws.onerror = function (e) { console.error('WS error', e); };
+            ws.onclose = function () { console.log('WS closed'); };
+            ws.onmessage = function (e) {
+                var msg = JSON.parse(e.data);
+                var box = document.getElementById('messages');
+                var div = document.createElement('div');
                 div.textContent = msg.author + ': ' + msg.text + ' (' + msg.sentAt + ')';
+
+                var color = getUserColor(msg.author);
+                div.style.borderLeftColor = color;
+                div.style.backgroundColor = color + '0a';
+
                 box.appendChild(div);
                 box.scrollTop = box.scrollHeight;
             };
         }
         function send() {
             if (!ws || ws.readyState !== 1) { console.warn('WS not open'); return; }
-            const author = document.getElementById('form:sname').value;
-            const text = document.getElementById('form:text').value;
+            var author = document.getElementById('form:sname').value;
+            var text = document.getElementById('form:text').value;
             if (!author || !text) return;
-            ws.send(JSON.stringify({ author, text }));
+            ws.send(JSON.stringify({ author: author, text: text }));
             document.getElementById('form:text').value = '';
         }
         window.addEventListener('load', connect);
+        //]]>
     </script>
 </h:head>
 <h:body>
